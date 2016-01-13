@@ -58,7 +58,6 @@ public:
             this->DiskParams.gapRW = 42;
             this->DiskParams.gapF = 82;
             this->DiskParams.fillerByte = 0xE9;
-            this->DiskParams.logSectSize = 2;
             this->DiskParams.sectSizeInRecords = 4;
         } else if(this->OutputDiskType == DSK_DATA) {
             this->DiskParams.recordsPerTrack = 36;
@@ -76,7 +75,6 @@ public:
             this->DiskParams.gapRW = 42;
             this->DiskParams.gapF = 82;
             this->DiskParams.fillerByte = 0xE9;
-            this->DiskParams.logSectSize = 2;
             this->DiskParams.sectSizeInRecords = 4;
         } else if(this->OutputDiskType == DSK_IBM) {
             this->DiskParams.recordsPerTrack = 32;
@@ -94,7 +92,6 @@ public:
             this->DiskParams.gapRW = 42;
             this->DiskParams.gapF = 80;
             this->DiskParams.fillerByte = 0xE9;
-            this->DiskParams.logSectSize = 2;
             this->DiskParams.sectSizeInRecords = 4;
 		}
 		else if (this->OutputDiskType == DSK_PCW720) {
@@ -113,7 +110,6 @@ public:
 			this->DiskParams.gapRW = 0x2A;
 			this->DiskParams.gapF = 0x52;
 			this->DiskParams.fillerByte = 0xE9;
-			this->DiskParams.logSectSize = 2;
 			this->DiskParams.sectSizeInRecords = 4;
 		} else if (this->OutputDiskType == DSK_PCW1440) {
 			this->DiskParams.recordsPerTrack = 0x48;
@@ -131,7 +127,6 @@ public:
 			this->DiskParams.gapRW = 0x1B;
 			this->DiskParams.gapF = 0x54;
 			this->DiskParams.fillerByte = 0xE9;
-			this->DiskParams.logSectSize = 2;
 			this->DiskParams.sectSizeInRecords = 4;
 		} else {
             this->DiskParams.recordsPerTrack = 36;
@@ -149,7 +144,6 @@ public:
             this->DiskParams.gapRW = 42;
             this->DiskParams.gapF = 82;
             this->DiskParams.fillerByte = 0xE9;
-            this->DiskParams.logSectSize = 2;
             this->DiskParams.sectSizeInRecords = 4;
         }
     }
@@ -215,9 +209,6 @@ public:
                 }
                 if (diskParams["fillerByte"] != Json::nullValue) {
                     this->DiskParams.fillerByte = (u8)diskParams["fillerByte"].asUInt();
-                }
-                if (diskParams["logSectSize"] != Json::nullValue) {
-                    this->DiskParams.logSectSize = (u8)diskParams["logSectSize"].asUInt();
                 }
                 if (diskParams["sectsizeInRecords"] != Json::nullValue) {
                     this->DiskParams.sectSizeInRecords = (u8)diskParams["sectSizeInRecords"].asUInt();

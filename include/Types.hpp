@@ -85,7 +85,6 @@ struct XDPB {
     u8                 gapRW;                // Gap length (read/write)
     u8                 gapF;                // Gap length (format)
     u8                 fillerByte;            // Filler Byte (for formatting)
-    u8                 logSectSize;         // Log2(sectorSize)-7
     u8                 sectSizeInRecords;    // Sector size in records
 };
 
