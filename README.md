@@ -59,7 +59,7 @@ Specifies the number of sectors per track in the disk. Default value is `9`. Onl
 Specifies the number of tracks in the disk. Default value is `80`. Only valid for `CUSTOM` disks.
 
 `--config <configFile>`
-Configuration file with all options and files specified in `JSON` format.
+Configuration file with all options and files specified in `JSON` format. **All other values are ignored, only the json is used**.
 
 `--help`
 Help. Show usage.
@@ -132,4 +132,60 @@ cfg.json contents:
 }
 ```
 
+###Custom disk format
+
+In order to fully customize the disk layout, you must use json based configuration, specifying a "diskParams" value. The "diskParams" value must contain the parameters specified here:
+
+http://www.seasip.info/Cpm/amsform.html
+
+The parameters to specify are:
+
+* `spt`:	Number of 128-byte records per track
+* `bsh`:	Block shift. 3 => 1k, 4 => 2k, 5 => 4k....
+* `blm`:	Block mask. 7 => 1k, 0Fh => 2k, 1Fh => 4k...
+* `exm`:	Extent mask
+* `dsm`: (number of blocks on the disc)-1
+* `drm`:	(number of directory entries)-1
+* `al0`:	Directory allocation bitmap, first byte
+* `al1`:	Directory allocation bitmap, second byte
+* `cks`:	Checksum vector size, 0 or 8000h for a fixed disc. Number of directory entries/4, rounded up.
+* `off`:	Offset, number of reserved tracks
+* `fsn`:	First sector number
+* `sectorsPerTrack`: Number of sectors per track,
+* `gapRW`: Read/write gap,
+* `gapF`: Format gap,
+* `fillerByte`: Byte considered as "empty",
+* `sectSizeInRecords`: Sector size in recors size (a record is 128 bytes).
+
+Example:
+
+```
+{
+    "sides": 1,
+    "catalog": "none",
+    "diskType": "custom",
+    "boot": "boot.bin",
+    "diskParams" : {
+        "spt": 36,
+        "bsh": 3,
+        "blm": 7,
+        "exm": 0,
+        "dsm": 179,
+        "drm": 63,
+        "al0": 0,
+        "al1": 192,
+        "cks": 16,
+        "off": 0,
+        "fsn": 65,
+        "sectorsPerTrack": 9,
+        "gapRW": 42,
+        "gapF": 82,
+        "fillerByte": 233,
+        "sectSizeInRecords": 4       
+    },
+    "files": [
+    { "path": "program.bin" }
+    ]
+}
+```
 If you liked this program, send the author an email ;)
