@@ -37,7 +37,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -149,6 +149,7 @@
     <ClInclude Include="..\include\Types.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\bin\boot.bin" />
     <None Include="..\bin\sampleConfig.json" />
     <None Include="..\bin\samplefile.bin" />
     <None Include="..\LICENSE" />

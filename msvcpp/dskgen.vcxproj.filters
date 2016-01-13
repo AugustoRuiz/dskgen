@@ -44,6 +44,7 @@
     <None Include="..\LICENSE" />
     <None Include="..\bin\sampleConfig.json" />
     <None Include="..\bin\samplefile.bin" />
+    <None Include="..\bin\boot.bin" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Includes">

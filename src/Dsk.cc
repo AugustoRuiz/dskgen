@@ -111,6 +111,8 @@ void Dsk::initCatalog(void) {
 
 	if (this->_catalogType == CAT_RAW || this->_catalogType == CAT_SF2) {
 		memcpy(((u8*)this->_catalogPtr) + 1, "RAW CATSF2CPC", 13);
+		this->_catalogPtr[14] = 0;
+		this->_catalogPtr[15] = 0;
 		this->_catalogPtr += 2 * sizeof(struct CatalogEntryRaw);
 	}
 }

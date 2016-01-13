@@ -2,7 +2,7 @@
     "sides": 2,
     "catalog": "raw",
     "diskType": "system",
-    "boot": "samplefile",
+    "boot": "boot.bin",
     "files": [
         {
             "path": "samplefile.bin",
