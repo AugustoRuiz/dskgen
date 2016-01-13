@@ -26,14 +26,13 @@ class Dsk {
     u8 _currentSide;
     u8 _currentBlock;
 
-    struct CatalogEntryRaw _catRaw[256];
-    struct CatalogEntryAmsdos _catAmsDos[2][256];
-
-    u16 _currentCatEntryIdx;
+	u8 _catalog[512 * sizeof(CatalogEntryAmsdos)];
+	u8* _catalogPtr;
 
     void setTrack(u8 side, u8 track);
     void advanceSectors(u8 sectors);
     void updateCurrentBlock(void);
+    void writeDataToSectors(u8* data, u32 length);
 
     void initCatalog(void);
     void initDskHeader(void);

@@ -1,8 +1,8 @@
 {
     "sides": 2,
-    "catalog": "cpm",
-    "diskType": "data",
-    "boot": null,
+    "catalog": "raw",
+    "diskType": "system",
+    "boot": "samplefile",
     "files": [
         {
             "path": "samplefile.bin",

@@ -10,7 +10,10 @@ CatalogType ParseCatalogType(const string &catStr) {
         result = CAT_RAW;    
     } else if(tmpStr == "cpm") {
         result = CAT_CPM;
-    } else {
+	} else if (tmpStr == "sf2") {
+		result = CAT_SF2;
+	}
+	else {
         stringstream ss;
         ss << "Catalog type not recognized: " << catStr << ".\nValid values are: CPM, RAW or NONE.\n";
         throw ss.str();
@@ -74,12 +77,15 @@ AmsdosFileType ParseAmsdosFileType(const string &fileTypeStr) {
     else if (tmpStr == "asc") {
         result = AMSDOS_FILE_ASCII;
     }
+	else if (tmpStr == "raw") {
+		result = AMSDOS_FILE_RAW_CAT;
+	}
     else if (tmpStr == "") {
         result = AMSDOS_FILE_NONE;
     }
     else {
         stringstream ss;
-        ss << "File type not recognized: " << fileTypeStr << ".\nValid values are: BAS, BIN, SCR, ASC, or empty string.\n";
+        ss << "File type not recognized: " << fileTypeStr << ".\nValid values are: BAS, BIN, SCR, ASC, RAW or empty string.\n";
         throw ss.str();
     }
     return result;

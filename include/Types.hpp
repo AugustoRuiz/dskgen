@@ -9,21 +9,43 @@
 using namespace std;
 
 #define        DSK_RECORD_SIZE            128
-
 #define        AMSDOS_EMPTY_BYTE        0xE5
 
-typedef enum { HDR_NONE=0, HDR_AMSDOS=1 } HeaderType;
+typedef enum { 
+	HDR_NONE=0, 
+	HDR_AMSDOS=1 
+} HeaderType;
 
 // RAW catalog: it stores in the first sector the following info for each file:
 //       Side (1byte), 
 //    Initial Track (1 byte) - track where the file starts, 
 //    Initial Sector Offset (1 byte) - counting from the first sector based on the disk type, 
 //    Length in bytes (3 bytes)
-typedef enum { CAT_NONE=0, CAT_RAW=1, CAT_CPM=2 } CatalogType;
+typedef enum { 
+	CAT_NONE=0, 
+	CAT_RAW=1, 
+	CAT_CPM=2, 
+	CAT_SF2=3 
+} CatalogType;
 
-typedef enum { DSK_SYSTEM=0, DSK_DATA=1, DSK_IBM=2, DSK_CUSTOM=3 } DiskType;
+typedef enum { 
+	DSK_SYSTEM = 0, 
+	DSK_DATA = 1, 
+	DSK_IBM = 2, 
+	DSK_PCW720 = 3, 
+	DSK_PCW1440 = 4, 
+	DSK_CUSTOM = 5 
+} DiskType;
 
-typedef enum { AMSDOS_FILE_NONE = 0, AMSDOS_FILE_INTERNAL_BASIC = 1, AMSDOS_FILE_BINARY = 2, AMSDOS_FILE_BINARY_PROTECTED = 3, AMSDOS_FILE_SCREEN_IMAGE = 4, AMSDOS_FILE_ASCII = 8 } AmsdosFileType;
+typedef enum { 
+	AMSDOS_FILE_NONE = 0, 
+	AMSDOS_FILE_INTERNAL_BASIC = 1, 
+	AMSDOS_FILE_BINARY = 2, 
+	AMSDOS_FILE_BINARY_PROTECTED = 3, 
+	AMSDOS_FILE_SCREEN_IMAGE = 4, 
+	AMSDOS_FILE_ASCII = 8, 
+	AMSDOS_FILE_RAW_CAT = 0xFF 
+} AmsdosFileType;
 
 CatalogType ParseCatalogType(const string &catStr);
 DiskType ParseDiskType(const string &diskStr);
@@ -107,7 +129,8 @@ struct DskTrack {
 };
 
 struct CatalogEntryAmsdos {
-    u8        UserNumber;     // Valid values are 0-15
+	u8        Side;           // Catalog side. Not to be written in disk!
+	u8        UserNumber;     // Valid values are 0-15
     u8        Name[8];
     u8        Extension[3];
     // File size: 

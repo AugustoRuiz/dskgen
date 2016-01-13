@@ -96,7 +96,44 @@ public:
             this->DiskParams.fillerByte = 0xE9;
             this->DiskParams.logSectSize = 2;
             this->DiskParams.sectSizeInRecords = 4;
-        } else {
+		}
+		else if (this->OutputDiskType == DSK_PCW720) {
+			this->DiskParams.recordsPerTrack = 0x24;
+			this->DiskParams.blockShift = 4;
+			this->DiskParams.blockMask = 0x0F;
+			this->DiskParams.extentMask = 0;
+			this->DiskParams.numBlocks = 0x164;
+			this->DiskParams.dirEntries = 0xFF;
+			this->DiskParams.allocationLo = 0x00;
+			this->DiskParams.allocationHi = 0xF0;
+			this->DiskParams.checksumLength = 0x40;
+			this->DiskParams.reservedTracks = 1;
+			this->DiskParams.firstSectorNumber = 0x01;
+			this->DiskParams.sectorsPerTrack = 9;
+			this->DiskParams.gapRW = 0x2A;
+			this->DiskParams.gapF = 0x52;
+			this->DiskParams.fillerByte = 0xE9;
+			this->DiskParams.logSectSize = 2;
+			this->DiskParams.sectSizeInRecords = 4;
+		} else if (this->OutputDiskType == DSK_PCW1440) {
+			this->DiskParams.recordsPerTrack = 0x48;
+			this->DiskParams.blockShift = 5;
+			this->DiskParams.blockMask = 0x1F;
+			this->DiskParams.extentMask = 0;
+			this->DiskParams.numBlocks = 0x164;
+			this->DiskParams.dirEntries = 0xFF;
+			this->DiskParams.allocationLo = 0x00;
+			this->DiskParams.allocationHi = 0xC0;
+			this->DiskParams.checksumLength = 0x40;
+			this->DiskParams.reservedTracks = 1;
+			this->DiskParams.firstSectorNumber = 0x01;
+			this->DiskParams.sectorsPerTrack = 9;
+			this->DiskParams.gapRW = 0x1B;
+			this->DiskParams.gapF = 0x54;
+			this->DiskParams.fillerByte = 0xE9;
+			this->DiskParams.logSectSize = 2;
+			this->DiskParams.sectSizeInRecords = 4;
+		} else {
             this->DiskParams.recordsPerTrack = 36;
             this->DiskParams.blockShift = 3;
             this->DiskParams.blockMask = 7;

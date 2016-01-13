@@ -24,6 +24,11 @@ all: $(APPNAME)
 $(APPNAME): $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
 
+$(OBJS): | $(OBJDIR)
+
+$(OBJDIR):
+	test -d $(OBJDIR) || mkdir $(OBJDIR)
+
 $(OBJDIR)/%.o: %.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c -I$(INCDIR) $<
 
