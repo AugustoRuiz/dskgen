@@ -12,10 +12,13 @@ CatalogType ParseCatalogType(const string &catStr) {
         result = CAT_CPM;
 	} else if (tmpStr == "sf2") {
 		result = CAT_SF2;
-	}
-	else {
+	} else if (tmpStr == "pasmo") {
+		result = CAT_PASMO;
+	} else if (tmpStr == "asz80") {
+		result = CAT_ASZ80;
+	} else {
         stringstream ss;
-        ss << "Catalog type not recognized: " << catStr << ".\nValid values are: CPM, RAW or NONE.\n";
+        ss << "Catalog type not recognized: " << catStr << ".\nValid values are: CPM, RAW, SF2, PASMO, ASZ80 or NONE.\n";
         throw ss.str();
     }
     return result;

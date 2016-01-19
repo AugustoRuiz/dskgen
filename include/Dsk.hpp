@@ -4,6 +4,7 @@
 #include "Types.hpp"
 #include "Options.hpp"
 #include "FileToProcess.hpp"
+#include  <iomanip>
 
 using namespace std;
 
@@ -37,7 +38,8 @@ class Dsk {
     void initCatalog(void);
     void initDskHeader(void);
     void addToCatalog(FileToProcess &file);
-    void dumpCatalogToDisc(void);
+    void dumpCatalogToDisc(string &path);
+	void dumpAsmCatalog(string &path);
 
     bool checkAmsdosHeader(u8* buffer);
     void fillAmsdosHeader(struct AmsdosHeader* header, const FileToProcess& file);

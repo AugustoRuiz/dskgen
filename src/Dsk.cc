@@ -15,6 +15,8 @@ Dsk::Dsk(u8 numSides, const struct XDPB& params, CatalogType catType) {
 
 	switch (this->_catalogType) {
 	case CAT_NONE:
+	case CAT_PASMO:
+	case CAT_ASZ80:
 		this->_catalogSizeInSectors = 0;
 		break;
 	case CAT_RAW:
@@ -109,7 +111,7 @@ void Dsk::initCatalog(void) {
 	memset(this->_catalog, (u8)AMSDOS_EMPTY_BYTE, sizeof(struct CatalogEntryAmsdos) * 512);
 	this->_catalogPtr = this->_catalog;
 
-	if (this->_catalogType == CAT_RAW || this->_catalogType == CAT_SF2) {
+	if (this->_catalogType != CAT_NONE && this->_catalogType != CAT_CPM) {
 		memcpy(((u8*)this->_catalogPtr) + 1, "RAW CATSF2CPC", 13);
 		this->_catalogPtr[14] = 0;
 		this->_catalogPtr[15] = 0;
@@ -194,7 +196,8 @@ int Dsk::AddBootFile(const string& path) {
 }
 
 void Dsk::addToCatalog(FileToProcess &file) {
-	if (this->_catalogType == CAT_RAW || (this->_catalogType == CAT_SF2 && file.AmsdosType == AMSDOS_FILE_RAW_CAT)) {
+	if (this->_catalogType != CAT_NONE && this->_catalogType != CAT_CPM &&
+	   (this->_catalogType != CAT_SF2 || file.AmsdosType == AMSDOS_FILE_RAW_CAT)) {
 		struct CatalogEntryRaw* rawEntry = (struct CatalogEntryRaw*) this->_catalogPtr;
 		rawEntry->EmptyByte = AMSDOS_EMPTY_BYTE;
 		rawEntry->Side = this->_currentSide;
@@ -266,8 +269,12 @@ void Dsk::fillAmsdosHeader(struct AmsdosHeader* header, const FileToProcess& fil
 	header->CheckSum = checksum;
 }
 
-void Dsk::dumpCatalogToDisc(void) {
+void Dsk::dumpCatalogToDisc(string &path) {
 	if (this->_catalogType == CAT_NONE) {
+		return;
+	}
+	if (this->_catalogType == CAT_PASMO || this->_catalogType == CAT_ASZ80) {
+		dumpAsmCatalog(path);
 		return;
 	}
 
@@ -332,10 +339,47 @@ void Dsk::dumpCatalogToDisc(void) {
 	}
 }
 
+void Dsk::dumpAsmCatalog(string &path) {
+	std::size_t dotPosition = path.find_last_of(".");
+	string asmPath = string(path);
+	if (dotPosition == string::npos) {
+		asmPath = asmPath + ".asm";
+	}
+	else {
+		asmPath.replace(asmPath.begin() + dotPosition + 1, asmPath.end(), "asm");
+	}
+	ofstream f(asmPath, ofstream::binary);
+	f << setfill('0') << hex;
+
+	struct CatalogEntryRaw* entryHdr = (struct CatalogEntryRaw*)this->_catalog;
+	struct CatalogEntryRaw* entry = (entryHdr + 2);
+	u16 entries = entryHdr[1].Padding[0] + (256 * entryHdr[1].Padding[1]);
+
+	for (u16 i = 0; i < entries; ++i, ++entry) {
+		FileToProcess fileInDsk = this->_filesInDsk[i];
+		if (this->_catalogType == CAT_PASMO) {
+			f << "FILE_" << fileInDsk.GetLabel() << ":" << endl
+				<< "; " << fileInDsk.SourcePath << endl
+				<< "; Side, track, sector" << endl
+				<< "defb #" << setw(2) << (int)entry->Side << ", #" << setw(2) << (int)entry->InitialTrack << ", #" << setw(2) << (int)entry->InitialSectorOffset << endl
+				<< "; Length in bytes" << endl
+				<< "defw #" << setw(4) << (int)entry->LengthInBytes << endl;
+		}
+		else {
+			f << "_FILE_" << fileInDsk.GetLabel() << ":" << endl
+				<< "; " << fileInDsk.SourcePath << endl
+				<< "; Side, track, sector" << endl
+				<< ".db #0x" << setw(2) << (int)entry->Side << ", #0x" << setw(2) << (int)entry->InitialTrack << ", #0x" << setw(2) << (int)entry->InitialSectorOffset << endl
+				<< "; Length in bytes" << endl
+				<< ".dw #0x" << setw(4) << (int)entry->LengthInBytes << endl;
+		}
+	}
+}
+
 void Dsk::Save(string &path) {
 	ofstream f(path, ofstream::binary);
 	if (f.good()) {
-		this->dumpCatalogToDisc();
+		this->dumpCatalogToDisc(path);
 		f.write((const char*)&this->_dskHeader, sizeof(struct DskHeader));
 		for (int t = 0; t < this->_numTracks * this->_numSides; ++t) {
 			DskTrack *track = &this->_dskTracks[t];

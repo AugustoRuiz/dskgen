@@ -25,7 +25,10 @@ typedef enum {
 	CAT_NONE=0, 
 	CAT_RAW=1, 
 	CAT_CPM=2, 
-	CAT_SF2=3 
+	CAT_SF2=3,
+	CAT_PASMO=4,
+	CAT_ASZ80=5,
+	CAT_C=6
 } CatalogType;
 
 typedef enum { 
