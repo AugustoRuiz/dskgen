@@ -1,16 +1,16 @@
 # dskgen
 Command line tool to create different types of .dsk files. (c) 2008-2015 Retroworks.
 
-##What is a .dsk file?
+## What is a .dsk file?
 A .dsk file is an image of a diskette that can be used in multiple emulators of machines such as Amstrad CPC or Spectrum +3, which used disks based on CPM formats.
 
-##How does it work?
+## How does it work?
 dskgen is used as a command line tool, so it will receive parameters that determine the type of diskette the image represents, and its contents.
 
 The .dsk file this tool generates follows the Extended DSK specification, which can be found here:
 http://cpctech.cpc-live.com/docs/extdsk.html
 
-##Parameters
+## Parameters
 
 `-o, --outputFileName`   
 (Optional) Output file name. Default value is `disk.dsk`.
@@ -64,7 +64,7 @@ Configuration file with all options and files specified in `JSON` format. **All 
 `--help`
 Help. Show usage.
 
-###Configuration JSON format:
+### Configuration JSON format:
 
 The JSON format is as follows:
 
@@ -85,7 +85,7 @@ The JSON format is as follows:
     ]
 ```
 
-###RAW Catalog format
+### RAW Catalog format
 
 ```
 Header       Entries 
@@ -132,7 +132,7 @@ cfg.json contents:
 }
 ```
 
-###Custom disk format
+### Custom disk format
 
 In order to fully customize the disk layout, you must use json based configuration, specifying a "diskParams" value. The "diskParams" value must contain the parameters specified here:
 
