@@ -1,18 +1,18 @@
 # dskgen
 Command line tool to create different types of .dsk files. (c) 2008-2015 Retroworks.
 
-##What is a .dsk file?
+## What is a .dsk file?
 A .dsk file is an image of a diskette that can be used in multiple emulators of machines such as Amstrad CPC or Spectrum +3, which used disks based on CPM formats.
 
-##How does it work?
+## How does it work?
 dskgen is used as a command line tool, so it will receive parameters that determine the type of diskette the image represents, and its contents.
 
 The .dsk file this tool generates follows the Extended DSK specification, which can be found here:
 http://cpctech.cpc-live.com/docs/extdsk.html
 
-##Parameters
+## Parameters
 
-`-o, --outputFileName`   
+`-o, --outputFileName`
 (Optional) Output file name. Default value is `disk.dsk`.
 
 `-b`
@@ -22,10 +22,10 @@ http://cpctech.cpc-live.com/docs/extdsk.html
 (Optional) Catalog type. Valid values are: `NONE`, `RAW` or `CPM`.
 * `NONE`: No catalog is added. This can be used if sectors will be read in raw mode, or if the first file to add contains CATART data (as the first file will be written on the first available track).
 * `CPM `: A standard CPM 2.2 catalog is created. This catalog is the one `AMSDOS` understands.
-* `RAW `: A catalog is created in `RAW` mode (see spec below). This catalog is not understood by the OS. The catalog is created in the first available track (depends on the disk type), and its first sector. 
+* `RAW `: A catalog is created in `RAW` mode (see spec below). This catalog is not understood by the OS. The catalog is created in the first available track (depends on the disk type), and its first sector.
 
 `-f, --files ARG1[;ARGn]`
-(Optional) Specifies the files to insert. Each file is specified as `path`,`header`,`fileType`,`loadAddr`,`exeAddr`, and is separated from the rest using a semicolon. 
+(Optional) Specifies the files to insert. Each file is specified as `path`,`header`,`fileType`,`loadAddr`,`exeAddr`, and is separated from the rest using a semicolon.
 * `path`: (Mandatory) Source file path.
 * `header`: (Optional) The header to add. Valid values are `NONE` or `AMSDOS`. If the header value is `AMSDOS`, the following values might be specified.
 * `fileType`: (Optional) The file type. Valid values are `bas`,`bin`,`binp`,`scr`,`asc`, or empty.
@@ -64,7 +64,7 @@ Configuration file with all options and files specified in `JSON` format. **All 
 `--help`
 Help. Show usage.
 
-###Configuration JSON format:
+### Configuration JSON format:
 
 The JSON format is as follows:
 
@@ -85,10 +85,10 @@ The JSON format is as follows:
     ]
 ```
 
-###RAW Catalog format
+### RAW Catalog format
 
 ```
-Header       Entries 
+Header       Entries
 (16 bytes)   (8 bytes each)
 ```
 
@@ -105,7 +105,7 @@ First entry is at offset 16.
 * Bytes 4-5: File length in bytes.
 * Bytes 6-7: Unused.
 
-##Examples
+## Examples
 
 ```
 dskgen -o disk.dsk -c RAW -t SYSTEM -h NONE --files fileSpec1[;fileSpec2;fileSpecN]
@@ -132,7 +132,7 @@ cfg.json contents:
 }
 ```
 
-###Custom disk format
+### Custom disk format
 
 In order to fully customize the disk layout, you must use json based configuration, specifying a "diskParams" value. The "diskParams" value must contain the parameters specified here:
 
@@ -181,7 +181,7 @@ Example:
         "gapRW": 42,
         "gapF": 82,
         "fillerByte": 233,
-        "sectSizeInRecords": 4       
+        "sectSizeInRecords": 4
     },
     "files": [
     { "path": "program.bin" }
