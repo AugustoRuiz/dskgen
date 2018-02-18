@@ -1,15 +1,45 @@
 {
     "sides": 2,
-    "catalog": "raw",
-    "diskType": "system",
-    "boot": "boot.bin",
+    "catalog": "sf2",
+    "diskType": "custom",
+    "diskParams": {
+        "blm": 15,
+        "bsh": 4,
+        "drm": 127,
+        "dsm": 89,
+        "fsn": 1,
+        "off": 0,
+        "sectorsPerTrack": 9,
+        "sectSizeInRecords": 4,
+        "spt": 36
+    },
     "files": [
-        {
-            "path": "samplefile.bin",
-            "header": "amsdos",
-            "amsdosType": "bin",
-            "loadAddress": 256,
-            "executionAddress": 1451
-        }
+		{ 
+			"path": "sf2.bin", 
+			"header": "amsdos", 
+			"amsdosType": "bin", 
+			"loadAddress": 256, 
+			"executionAddress": 3963 
+		},
+		{ 
+			"path": "FBLA.bin", 
+			"header": "none", 
+			"amsdosType": "raw" 
+		},
+		{ 
+			"path": "FRYU.bin", 
+			"header": "none", 
+			"amsdosType": "raw"
+		},
+		{ 
+			"path": "ryu_1.bin",
+			"header": "none",
+			"amsdosType": "raw"
+		},
+		{
+			"path": "ryu_2.bin",
+			"header": "none",
+			"amsdosType": "raw"
+		}
     ]
 }

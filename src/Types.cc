@@ -35,7 +35,13 @@ DiskType ParseDiskType(const string &diskStr) {
         result = DSK_DATA;
     } else if(tmpStr == "ibm") {
         result = DSK_IBM;
-    } else if(tmpStr == "custom") {
+    } else if(tmpStr == "pcw720") {
+        result = DSK_PCW720;
+    } else if(tmpStr == "pcw1440") {
+        result = DSK_PCW1440;
+    } else if (tmpStr == "romdos_d1") {
+		result = DSK_ROMDOS_D1;
+	} else if(tmpStr == "custom") {
         result = DSK_CUSTOM;
     } else {
         stringstream ss;

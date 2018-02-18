@@ -4,7 +4,7 @@ Dsk::Dsk(u8 numSides, const struct XDPB& params, CatalogType catType) {
 	this->_numSides = numSides;
 	memcpy(&this->_specs, &params, sizeof(struct XDPB));
 
-	this->_blockSize = DSK_RECORD_SIZE * (1 << (this->_specs.blockShift));
+	this->_blockSize = this->_numSides * DSK_RECORD_SIZE * (1 << (this->_specs.blockShift));
 
 	u16 sectorSize = this->_specs.sectSizeInRecords * DSK_RECORD_SIZE;
 	u16 sectorsPerBlock = (this->_blockSize / sectorSize);
@@ -41,14 +41,29 @@ Dsk::Dsk(u8 numSides, const struct XDPB& params, CatalogType catType) {
 
 void Dsk::advanceSectors(u8 sectors) {
 	this->_currentSector += sectors;
-	while (this->_currentSector >= this->_specs.firstSectorNumber + this->_specs.sectorsPerTrack) {
-		this->_currentSector -= this->_specs.sectorsPerTrack;
-		this->_currentTrack++;
-		if (this->_currentTrack >= (this->_numSides * this->_numTracks)) {
-			this->_currentTrack -= this->_numTracks;
+	if (this->_specs.sidesInterleaved) {
+		while (this->_currentSector >= this->_specs.firstSectorNumber + this->_specs.sectorsPerTrack) {
+			this->_currentSector -= this->_specs.sectorsPerTrack;
 			this->_currentSide++;
-			if (this->_currentSide >= this->_numSides) {
-				throw "ERROR: Disk full!";
+			if (this->_currentSide >= (this->_numSides)) {
+				this->_currentTrack++;
+				this->_currentSide -= this->_numSides;
+				if (this->_currentTrack >= this->_numTracks) {
+					throw "ERROR: Disk full!";
+				}
+			}
+		}
+	}
+	else {
+		while (this->_currentSector >= this->_specs.firstSectorNumber + this->_specs.sectorsPerTrack) {
+			this->_currentSector -= this->_specs.sectorsPerTrack;
+			this->_currentTrack++;
+			if (this->_currentTrack >= (this->_numTracks)) {
+				this->_currentSide++;
+				this->_currentTrack -= this->_numTracks;
+				if (this->_currentSide >= this->_numSides) {
+					throw "ERROR: Disk full!";
+				}
 			}
 		}
 	}
@@ -57,7 +72,8 @@ void Dsk::advanceSectors(u8 sectors) {
 
 void Dsk::updateCurrentBlock(void) {
 	this->_currentBlock = (
-		(this->_currentTrack * this->_specs.sectorsPerTrack + (this->_currentSector - this->_specs.firstSectorNumber)) *
+		((this->_currentTrack - this->_specs.reservedTracks) * this->_specs.sectorsPerTrack +
+		(this->_currentSector - this->_specs.firstSectorNumber)) *
 		this->_specs.sectSizeInRecords * DSK_RECORD_SIZE)
 		/ this->_blockSize;
 }
@@ -115,11 +131,12 @@ void Dsk::initCatalog(void) {
 		memcpy(((u8*)this->_catalogPtr) + 1, "RAW CATSF2CPC", 13);
 		this->_catalogPtr[14] = 0;
 		this->_catalogPtr[15] = 0;
-		this->_catalogPtr += 2 * sizeof(struct CatalogEntryRaw);
+		this->_catalogPtr += 4 * sizeof(struct CatalogEntryRaw);
 	}
 }
 
 int Dsk::AddFile(FileToProcess &file) {
+	cout << "Adding file '" << file.SourcePath << "'... ";
 	ifstream f(file.SourcePath, ifstream::binary);
 	if (f.good()) {
 		f.seekg(0, f.end);
@@ -130,6 +147,7 @@ int Dsk::AddFile(FileToProcess &file) {
 		f.close();
 
 		if (file.Header == HDR_AMSDOS) {
+			cout << "Checking AMSDOS header... ";
 			if (!checkAmsdosHeader(fileData)) {
 				u8 headerSize = sizeof(struct AmsdosHeader);
 				u32 newLength = file.Length + headerSize;
@@ -146,11 +164,18 @@ int Dsk::AddFile(FileToProcess &file) {
 		}
 
 		_filesInDsk.push_back(file);
+		cout << "Adding to catalog... ";
 		addToCatalog(file);
 
 		// add data to sectors!
 		this->writeDataToSectors(fileData, file.Length);
 	}
+	else {
+		// Something's wrong with the file!
+		cout << endl;
+		return -1;
+	}
+	cout << endl;
 	return 0;
 }
 
@@ -196,8 +221,11 @@ int Dsk::AddBootFile(const string& path) {
 }
 
 void Dsk::addToCatalog(FileToProcess &file) {
-	if (this->_catalogType != CAT_NONE && this->_catalogType != CAT_CPM &&
-	   (this->_catalogType != CAT_SF2 || file.AmsdosType == AMSDOS_FILE_RAW_CAT)) {
+	if (this->_catalogType == CAT_RAW ||
+		this->_catalogType == CAT_PASMO ||
+		this->_catalogType == CAT_ASZ80 ||
+		this->_catalogType == CAT_C ||
+		(this->_catalogType == CAT_SF2 && file.AmsdosType == AMSDOS_FILE_RAW_CAT)) {
 		struct CatalogEntryRaw* rawEntry = (struct CatalogEntryRaw*) this->_catalogPtr;
 		rawEntry->EmptyByte = AMSDOS_EMPTY_BYTE;
 		rawEntry->Side = this->_currentSide;
@@ -221,7 +249,12 @@ void Dsk::addToCatalog(FileToProcess &file) {
 			struct CatalogEntryAmsdos* amsEntry = (struct CatalogEntryAmsdos*) this->_catalogPtr;
 			amsEntry->Side = this->_currentSide;
 			amsEntry->UserNumber = 0;
+
 			memcpy(amsEntry->Name, file.AmsDosName, 11);
+			if(file.Hidden) {
+				amsEntry->Extension[1] |= (u8)0x80;
+			}
+			
 			amsEntry->ExtentLoByte = extentIdx % 32;
 			amsEntry->ExtentPadding = 0;
 			amsEntry->ExtentHiByte = extentIdx / 32;
@@ -232,7 +265,13 @@ void Dsk::addToCatalog(FileToProcess &file) {
 				amsEntry->Blocks[b] = this->_currentBlock++;
 			}
 			blocksCovered += blocksInExtent;
-			this->_catalogPtr += sizeof(struct CatalogEntryAmsdos*);
+			this->_catalogPtr += sizeof(struct CatalogEntryAmsdos);
+		}
+		if (this->_catalogType == CAT_SF2) {
+			struct CatalogEntryRaw* rawEntry = (struct CatalogEntryRaw*) this->_catalog;
+			u16 entries = rawEntry[1].Padding[0] + (256 * rawEntry[1].Padding[1]) + 1;
+			rawEntry[1].Padding[0] = entries % 256;
+			rawEntry[1].Padding[1] = entries / 256;
 		}
 	}
 }
@@ -290,8 +329,8 @@ void Dsk::dumpCatalogToDisc(string &path) {
 
 	if (this->_catalogType == CAT_RAW || this->_catalogType == CAT_SF2) {
 		memcpy(sectorPtr, catPtr, 16);
-		catPtr += 16;
-		sectorPtr += 16;
+		catPtr += 32;
+		sectorPtr += 32;
 	}
 
 	while (catPtr < this->_catalogPtr) {
@@ -311,13 +350,13 @@ void Dsk::dumpCatalogToDisc(string &path) {
 		else {
 			struct CatalogEntryAmsdos* entry = (struct CatalogEntryAmsdos*)catPtr;
 
-			if (side != entry->Side) {
-				side = entry->Side;
-				trackIdx = this->_specs.reservedTracks + side;
-				sectorIdx = 0;
-				sector = &(this->_dskTracks[trackIdx].Sectors[sectorIdx]);
-				sectorPtr = sector->Data;
-			}
+			//if (side != entry->Side) {
+			//	side = entry->Side;
+			//	trackIdx = this->_specs.reservedTracks + side;
+			//	sectorIdx = 0;
+			//	sector = &(this->_dskTracks[trackIdx].Sectors[sectorIdx]);
+			//	sectorPtr = sector->Data;
+			//}
 
 			// Amsdos entry.
 			memcpy(sectorPtr, ((u8*)entry) + 1, sizeof(struct CatalogEntryAmsdos) - 1);
@@ -327,11 +366,17 @@ void Dsk::dumpCatalogToDisc(string &path) {
 		if (sectorPtr - sector->Data > sectorSize) {
 			throw "Error doing math with catalog dump!";
 		}
+
 		if (sectorPtr - sector->Data == sectorSize) {
 			sectorIdx++;
 			if (sectorIdx == _specs.sectorsPerTrack) {
 				sectorIdx -= _specs.sectorsPerTrack;
-				trackIdx += 2;
+				if (this->_specs.sidesInterleaved) {
+					trackIdx++;
+				}
+				else {
+					trackIdx+=2;
+				}
 			}
 			sector = &(this->_dskTracks[trackIdx].Sectors[sectorIdx]);
 			sectorPtr = sector->Data;

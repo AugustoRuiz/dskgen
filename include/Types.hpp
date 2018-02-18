@@ -37,7 +37,8 @@ typedef enum {
 	DSK_IBM = 2, 
 	DSK_PCW720 = 3, 
 	DSK_PCW1440 = 4, 
-	DSK_CUSTOM = 5 
+	DSK_ROMDOS_D1 = 5,
+	DSK_CUSTOM = 6
 } DiskType;
 
 typedef enum { 
@@ -73,22 +74,23 @@ struct u24 {
 };
 
 struct XDPB {
-    u16                recordsPerTrack;    // (spt) Number of 128-byte records on each track;
-    u8                 blockShift;            // (bsh) log2 BLS - 7
+    u16                recordsPerTrack;      // (spt) Number of 128-byte records on each track;
+    u8                 blockShift;           // (bsh) log2 BLS - 7
     u8                 blockMask;            // (blm) BLS / 128 - 1
-    u8                 extentMask;            // (exm) Extent mask. DSM < 256 ? BLS/1024 - 1 : BLS/2048 - 1 
+    u8                 extentMask;           // (exm) Extent mask. DSM < 256 ? BLS/1024 - 1 : BLS/2048 - 1 
     u16                numBlocks;            // (dsm) Total size of disk in blocks excluding reserved tracks.
-    u16                dirEntries;            // (drm) Total number of directory entries - 1
-    u8                 allocationLo;        // (al01) Bit significant representation of number of directory blocks (#0080 => 1, #00C0 => 2)
-    u8                 allocationHi;        // (al01) Bit significant representation of number of directory blocks (#0080 => 1, #00C0 => 2)
-    u16                checksumLength;        // (cks) Length of checksum vector. Normally drm/4 + 1, but if checksumming not required, 0
-    u16                reservedTracks;        // (off) Number of reserved tracks. This is also the track the directory starts.
+    u16                dirEntries;           // (drm) Total number of directory entries - 1
+    u8                 allocationLo;         // (al01) Bit significant representation of number of directory blocks (#0080 => 1, #00C0 => 2)
+    u8                 allocationHi;         // (al01) Bit significant representation of number of directory blocks (#0080 => 1, #00C0 => 2)
+    u16                checksumLength;       // (cks) Length of checksum vector. Normally drm/4 + 1, but if checksumming not required, 0
+    u16                reservedTracks;       // (off) Number of reserved tracks. This is also the track the directory starts.
     u8                 firstSectorNumber;    // First sector number.
-    u8                 sectorsPerTrack;    // Sectors per track.
+    u8                 sectorsPerTrack;      // Sectors per track.
     u8                 gapRW;                // Gap length (read/write)
-    u8                 gapF;                // Gap length (format)
-    u8                 fillerByte;            // Filler Byte (for formatting)
+    u8                 gapF;                 // Gap length (format)
+    u8                 fillerByte;           // Filler Byte (for formatting)
     u8                 sectSizeInRecords;    // Sector size in records
+	u8				   sidesInterleaved;     // If 1, data is written on each side before advancing track. If 0, data is written to all tracks in one side, then the other.
 };
 
 /* DSK Format: http://cpctech.cpc-live.com/docs/dsk.html */

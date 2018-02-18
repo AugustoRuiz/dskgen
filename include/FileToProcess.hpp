@@ -22,6 +22,7 @@ public:
 
     u16 LoadAddress;
     u16 ExecutionAddress;
+    bool Hidden;
 
     void SetSourcePath(string path) {
         string tmpStr(path);

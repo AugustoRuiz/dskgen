@@ -4,7 +4,9 @@
 #include "Types.hpp"
 #include "Options.hpp"
 #include "FileToProcess.hpp"
-#include  <iomanip>
+#include <iomanip>
+#include <iostream>
+#include <math.h>   
 
 using namespace std;
 

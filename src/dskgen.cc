@@ -31,6 +31,7 @@ void showUsage(ezOptionParser &options) {
 }
 
 int extractOptions(ezOptionParser &switches, Options &options) {
+	cout << "Extracting options..." << endl;
 	switches.get("-o")->getString(options.OutputFileName);
 	if (switches.isSet("--config")) {
 		string configFile;
@@ -156,6 +157,8 @@ int main(int argc, const char** argv)
 		showUsage(switches);
 		return -1;
 	}
+
+    cout << "Creating disk with " << ((int)opt.NumSides) << " sides, catalog type: " << opt.Catalog << "." << endl;
 
 	Dsk disk(opt.NumSides, opt.DiskParams, opt.Catalog);
 	if (!opt.BootFile.empty()) {

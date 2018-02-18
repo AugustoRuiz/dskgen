@@ -1,0 +1,6 @@
+bin
+msvcpp
+!msvcpp/dskgen.sln
+!msvcpp/dskgen.vcxproj
+!msvcpp/dskgen.vcxproj.filters
+obj

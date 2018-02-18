@@ -3,6 +3,7 @@
 
 #include <string>
 #include <fstream>
+#include <iostream>
 #include <json/json.h>
 #include "Types.hpp"
 #include "FileToProcess.hpp"
@@ -11,88 +12,93 @@ using namespace std;
 
 class Options {
 public:
-    Options() { };
+	Options() { };
 
-    string                     OutputFileName;
-    string                     BootFile;
-    CatalogType                Catalog;
-    DiskType                   OutputDiskType;
-    u8                         NumSides;
-    struct XDPB                DiskParams;
-    vector<FileToProcess>      FilesToProcess;
+	string                     OutputFileName;
+	string                     BootFile;
+	CatalogType                Catalog;
+	DiskType                   OutputDiskType;
+	u8                         NumSides;
+	struct XDPB                DiskParams;
+	vector<FileToProcess>      FilesToProcess;
 
-    void AddFile(const FileToProcess &f) {
-        this->FilesToProcess.push_back(f);
-    }
+	void AddFile(const FileToProcess &f) {
+		this->FilesToProcess.push_back(f);
+	}
 
-    FileToProcess GetBootFile() {
-        FileToProcess result;
-        for(vector<FileToProcess>::iterator it=FilesToProcess.begin(); it!= FilesToProcess.end();++it) {
-            if(it->SourcePath == BootFile) {
-                result = *it;
-                break;
-            }
-        }
-        return result;
-    }
+	FileToProcess GetBootFile() {
+		FileToProcess result;
+		for (vector<FileToProcess>::iterator it = FilesToProcess.begin(); it != FilesToProcess.end(); ++it) {
+			if (it->SourcePath == BootFile) {
+				result = *it;
+				break;
+			}
+		}
+		return result;
+	}
 
-    void SetCatalogType(const string &catStr) {
-        this->Catalog = ParseCatalogType(catStr);
-    }
+	void SetCatalogType(const string &catStr) {
+		this->Catalog = ParseCatalogType(catStr);
+	}
 
-    void SetDiskType(const string &diskStr) {
-        this->OutputDiskType = ParseDiskType(diskStr);
-        if(this->OutputDiskType == DSK_SYSTEM) {
-            this->DiskParams.recordsPerTrack = 36;
-            this->DiskParams.blockShift = 3;
-            this->DiskParams.blockMask = 7;
-            this->DiskParams.extentMask = 0;
-            this->DiskParams.numBlocks = 170;
-            this->DiskParams.dirEntries = 63;
-            this->DiskParams.allocationLo = 0x00;
-            this->DiskParams.allocationHi = 0xC0;
-            this->DiskParams.checksumLength = 16;
-            this->DiskParams.reservedTracks = 2;
-            this->DiskParams.firstSectorNumber = 0x41;
-            this->DiskParams.sectorsPerTrack = 9;
-            this->DiskParams.gapRW = 42;
-            this->DiskParams.gapF = 82;
-            this->DiskParams.fillerByte = 0xE9;
-            this->DiskParams.sectSizeInRecords = 4;
-        } else if(this->OutputDiskType == DSK_DATA) {
-            this->DiskParams.recordsPerTrack = 36;
-            this->DiskParams.blockShift = 3;
-            this->DiskParams.blockMask = 7;
-            this->DiskParams.extentMask = 0;
-            this->DiskParams.numBlocks = 179;
-            this->DiskParams.dirEntries = 63;
-            this->DiskParams.allocationLo = 0x00;
-            this->DiskParams.allocationHi = 0xC0;
-            this->DiskParams.checksumLength = 16;
-            this->DiskParams.reservedTracks = 0;
-            this->DiskParams.firstSectorNumber = 0xC1;
-            this->DiskParams.sectorsPerTrack = 9;
-            this->DiskParams.gapRW = 42;
-            this->DiskParams.gapF = 82;
-            this->DiskParams.fillerByte = 0xE9;
-            this->DiskParams.sectSizeInRecords = 4;
-        } else if(this->OutputDiskType == DSK_IBM) {
-            this->DiskParams.recordsPerTrack = 32;
-            this->DiskParams.blockShift = 3;
-            this->DiskParams.blockMask = 7;
-            this->DiskParams.extentMask = 0;
-            this->DiskParams.numBlocks = 155;
-            this->DiskParams.dirEntries = 63;
-            this->DiskParams.allocationLo = 0x00;
-            this->DiskParams.allocationHi = 0xC0;
-            this->DiskParams.checksumLength = 16;
-            this->DiskParams.reservedTracks = 1;
-            this->DiskParams.firstSectorNumber = 0x01;
-            this->DiskParams.sectorsPerTrack = 8;
-            this->DiskParams.gapRW = 42;
-            this->DiskParams.gapF = 80;
-            this->DiskParams.fillerByte = 0xE9;
-            this->DiskParams.sectSizeInRecords = 4;
+	void SetDiskType(const string &diskStr) {
+		this->OutputDiskType = ParseDiskType(diskStr);
+		if (this->OutputDiskType == DSK_SYSTEM) {
+			this->DiskParams.recordsPerTrack = 36;
+			this->DiskParams.blockShift = 3;
+			this->DiskParams.blockMask = 7;
+			this->DiskParams.extentMask = 0;
+			this->DiskParams.numBlocks = 170;
+			this->DiskParams.dirEntries = 63;
+			this->DiskParams.allocationLo = 0x00;
+			this->DiskParams.allocationHi = 0xC0;
+			this->DiskParams.checksumLength = 16;
+			this->DiskParams.reservedTracks = 2;
+			this->DiskParams.firstSectorNumber = 0x41;
+			this->DiskParams.sectorsPerTrack = 9;
+			this->DiskParams.gapRW = 42;
+			this->DiskParams.gapF = 82;
+			this->DiskParams.fillerByte = 0xE9;
+			this->DiskParams.sectSizeInRecords = 4;
+			this->DiskParams.sidesInterleaved = 0;
+		}
+		else if (this->OutputDiskType == DSK_DATA) {
+			this->DiskParams.recordsPerTrack = 36;
+			this->DiskParams.blockShift = 3;
+			this->DiskParams.blockMask = 7;
+			this->DiskParams.extentMask = 0;
+			this->DiskParams.numBlocks = 179;
+			this->DiskParams.dirEntries = 63;
+			this->DiskParams.allocationLo = 0x00;
+			this->DiskParams.allocationHi = 0xC0;
+			this->DiskParams.checksumLength = 16;
+			this->DiskParams.reservedTracks = 0;
+			this->DiskParams.firstSectorNumber = 0xC1;
+			this->DiskParams.sectorsPerTrack = 9;
+			this->DiskParams.gapRW = 42;
+			this->DiskParams.gapF = 82;
+			this->DiskParams.fillerByte = 0xE9;
+			this->DiskParams.sectSizeInRecords = 4;
+			this->DiskParams.sidesInterleaved = 0;
+		}
+		else if (this->OutputDiskType == DSK_IBM) {
+			this->DiskParams.recordsPerTrack = 32;
+			this->DiskParams.blockShift = 3;
+			this->DiskParams.blockMask = 7;
+			this->DiskParams.extentMask = 0;
+			this->DiskParams.numBlocks = 155;
+			this->DiskParams.dirEntries = 63;
+			this->DiskParams.allocationLo = 0x00;
+			this->DiskParams.allocationHi = 0xC0;
+			this->DiskParams.checksumLength = 16;
+			this->DiskParams.reservedTracks = 1;
+			this->DiskParams.firstSectorNumber = 0x01;
+			this->DiskParams.sectorsPerTrack = 8;
+			this->DiskParams.gapRW = 42;
+			this->DiskParams.gapF = 80;
+			this->DiskParams.fillerByte = 0xE9;
+			this->DiskParams.sectSizeInRecords = 4;
+			this->DiskParams.sidesInterleaved = 0;
 		}
 		else if (this->OutputDiskType == DSK_PCW720) {
 			this->DiskParams.recordsPerTrack = 0x24;
@@ -111,7 +117,9 @@ public:
 			this->DiskParams.gapF = 0x52;
 			this->DiskParams.fillerByte = 0xE9;
 			this->DiskParams.sectSizeInRecords = 4;
-		} else if (this->OutputDiskType == DSK_PCW1440) {
+			this->DiskParams.sidesInterleaved = 1;
+		}
+		else if (this->OutputDiskType == DSK_PCW1440) {
 			this->DiskParams.recordsPerTrack = 0x48;
 			this->DiskParams.blockShift = 5;
 			this->DiskParams.blockMask = 0x1F;
@@ -128,113 +136,153 @@ public:
 			this->DiskParams.gapF = 0x54;
 			this->DiskParams.fillerByte = 0xE9;
 			this->DiskParams.sectSizeInRecords = 4;
-		} else {
-            this->DiskParams.recordsPerTrack = 36;
-            this->DiskParams.blockShift = 3;
-            this->DiskParams.blockMask = 7;
-            this->DiskParams.extentMask = 0;
-            this->DiskParams.numBlocks = 179;
-            this->DiskParams.dirEntries = 63;
-            this->DiskParams.allocationLo = 0x00;
-            this->DiskParams.allocationHi = 0xC0;
-            this->DiskParams.checksumLength = 16;
-            this->DiskParams.reservedTracks = 0;
-            this->DiskParams.firstSectorNumber = 0xC1;
-            this->DiskParams.sectorsPerTrack = 9;
-            this->DiskParams.gapRW = 42;
-            this->DiskParams.gapF = 82;
-            this->DiskParams.fillerByte = 0xE9;
-            this->DiskParams.sectSizeInRecords = 4;
-        }
-    }
+			this->DiskParams.sidesInterleaved = 1;
+		}
+		else if (this->OutputDiskType == DSK_ROMDOS_D1) {
+			this->DiskParams.recordsPerTrack = 0x24;
+			this->DiskParams.blockShift = 4;
+			this->DiskParams.blockMask = 0x0F;
+			this->DiskParams.extentMask = 0;
+			this->DiskParams.numBlocks = 0x59;
+			this->DiskParams.dirEntries = 0x3F;
+			this->DiskParams.allocationLo = 0x00;
+			this->DiskParams.allocationHi = 0xC0;
+			this->DiskParams.checksumLength = 0x40;
+			this->DiskParams.reservedTracks = 0;
+			this->DiskParams.firstSectorNumber = 0x01;
+			this->DiskParams.sectorsPerTrack = 9;
+			this->DiskParams.gapRW = 0x1B;
+			this->DiskParams.gapF = 0x54;
+			this->DiskParams.fillerByte = 0xE9;
+			this->DiskParams.sectSizeInRecords = 4;
+			this->DiskParams.sidesInterleaved = 1;
+		}
+		else {
+			this->DiskParams.recordsPerTrack = 36;
+			this->DiskParams.blockShift = 3;
+			this->DiskParams.blockMask = 7;
+			this->DiskParams.extentMask = 0;
+			this->DiskParams.numBlocks = 179;
+			this->DiskParams.dirEntries = 63;
+			this->DiskParams.allocationLo = 0x00;
+			this->DiskParams.allocationHi = 0xC0;
+			this->DiskParams.checksumLength = 16;
+			this->DiskParams.reservedTracks = 0;
+			this->DiskParams.firstSectorNumber = 0xC1;
+			this->DiskParams.sectorsPerTrack = 9;
+			this->DiskParams.gapRW = 42;
+			this->DiskParams.gapF = 82;
+			this->DiskParams.fillerByte = 0xE9;
+			this->DiskParams.sectSizeInRecords = 4;
+			this->DiskParams.sidesInterleaved = 0;
+		}
+	}
 
-    void ParseFile(string& configFile) {
-        ifstream file(configFile, ifstream::binary);
-        Json::Value root;
-        file >> root;
+	void ParseFile(string& configFile) {
+		//cout << "Parsing options file '" << configFile << "'.";
+		ifstream file(configFile, ifstream::binary);
+		if (file.good()) {
+			Json::Value root;
+			file >> root;
 
-        this->SetCatalogType(root.get("catalog", "none").asString());
-        this->SetDiskType(root.get("diskType", "system").asString());
-        this->NumSides = (u8) root.get("sides", "1").asUInt();
+			string tmpStr = root.get("catalog", "none").asString();
+			//cout << "Catalog: " << tmpStr << endl;
+			this->SetCatalogType(tmpStr);
 
-        if (root["boot"] != Json::nullValue) {
-            this->BootFile = root["boot"].asString();
-        }
+			tmpStr = root.get("diskType", "system").asString();
+			//cout << "Disk Type: " << tmpStr << endl;
+			this->SetDiskType(tmpStr);
 
-        if (this->OutputDiskType == DSK_CUSTOM) {
-            Json::Value diskParams = root["diskParams"];
-            if (!diskParams.isNull()) {
-                // Get the XDPB specified parameters...
-                if (diskParams["spt"] != Json::nullValue) {
-                    this->DiskParams.recordsPerTrack = (u16) diskParams["spt"].asUInt();
-                }
-                if (diskParams["bsh"] != Json::nullValue) {
-                    this->DiskParams.blockShift = (u8)diskParams["bsh"].asUInt();
-                }
-                if (diskParams["blm"] != Json::nullValue) {
-                    this->DiskParams.blockMask = (u8)diskParams["blm"].asUInt();
-                }
-                if (diskParams["exm"] != Json::nullValue) {
-                    this->DiskParams.extentMask = (u8)diskParams["exm"].asUInt();
-                }
-                if (diskParams["dsm"] != Json::nullValue) {
-                    this->DiskParams.numBlocks = (u16)diskParams["dsm"].asUInt();
-                }
-                if (diskParams["drm"] != Json::nullValue) {
-                    this->DiskParams.dirEntries = (u16)diskParams["drm"].asUInt();
-                }
-                if (diskParams["al0"] != Json::nullValue) {
-                    this->DiskParams.allocationLo = (u8)diskParams["al0"].asUInt();
-                }
-                if (diskParams["al1"] != Json::nullValue) {
-                    this->DiskParams.allocationHi = (u8)diskParams["al1"].asUInt();
-                }
-                if (diskParams["cks"] != Json::nullValue) {
-                    this->DiskParams.checksumLength = (u16)diskParams["cks"].asUInt();
-                }
-                if (diskParams["off"] != Json::nullValue) {
-                    this->DiskParams.reservedTracks = (u16)diskParams["off"].asUInt();
-                }
-                if (diskParams["fsn"] != Json::nullValue) {
-                    this->DiskParams.firstSectorNumber = (u8)diskParams["fsn"].asUInt();
-                }
-                if (diskParams["sectorsPerTrack"] != Json::nullValue) {
-                    this->DiskParams.sectorsPerTrack = (u8)diskParams["sectorsPerTrack"].asUInt();
-                }
-                if (diskParams["gapRW"] != Json::nullValue) {
-                    this->DiskParams.gapRW = (u8)diskParams["gapRW"].asUInt();
-                }
-                if (diskParams["gapF"] != Json::nullValue) {
-                    this->DiskParams.gapF = (u8)diskParams["gapF"].asUInt();
-                }
-                if (diskParams["fillerByte"] != Json::nullValue) {
-                    this->DiskParams.fillerByte = (u8)diskParams["fillerByte"].asUInt();
-                }
-                if (diskParams["sectsizeInRecords"] != Json::nullValue) {
-                    this->DiskParams.sectSizeInRecords = (u8)diskParams["sectSizeInRecords"].asUInt();
-                }
-            }
-        }
+			this->NumSides = (u8)root.get("sides", "1").asUInt();
+			//cout << "Num sides: " << (int)this->NumSides << endl;
 
-        const Json::Value files = root["files"];
-        if(files != Json::Value::null) {
-            for (Json::Value::iterator it=files.begin(); it != files.end(); ++it) {
-                Json::Value current = *it;
-                FileToProcess f;
-                if (current["path"] == Json::nullValue) {
-                    throw "A file was found without path in configration file.";
-                }
-                
-                f.SetSourcePath(current["path"].asString());
-                f.Header = ParseHeaderType(current.get("header", "none").asString());
-                f.AmsdosType = ParseAmsdosFileType(current.get("amsdosType", "").asString());
-                f.LoadAddress = (u16) current.get("loadAddress", 0).asUInt();
-                f.ExecutionAddress = (u16)current.get("executionAddress", 0).asUInt();
+			if (root["boot"] != Json::nullValue) {
+				//cout << "Boot file: " << root["boot"].asString() << endl;
+				this->BootFile = root["boot"].asString();
+			}
 
-                this->FilesToProcess.push_back(f);
-               }
-        }
-    }
+			if (this->OutputDiskType == DSK_CUSTOM) {
+				Json::Value diskParams = root["diskParams"];
+				if (!diskParams.isNull()) {
+					// Get the XDPB specified parameters...
+					if (diskParams["spt"] != Json::nullValue) {
+						this->DiskParams.recordsPerTrack = (u16)diskParams["spt"].asUInt();
+					}
+					if (diskParams["bsh"] != Json::nullValue) {
+						this->DiskParams.blockShift = (u8)diskParams["bsh"].asUInt();
+					}
+					if (diskParams["blm"] != Json::nullValue) {
+						this->DiskParams.blockMask = (u8)diskParams["blm"].asUInt();
+					}
+					if (diskParams["exm"] != Json::nullValue) {
+						this->DiskParams.extentMask = (u8)diskParams["exm"].asUInt();
+					}
+					if (diskParams["dsm"] != Json::nullValue) {
+						this->DiskParams.numBlocks = (u16)diskParams["dsm"].asUInt();
+					}
+					if (diskParams["drm"] != Json::nullValue) {
+						this->DiskParams.dirEntries = (u16)diskParams["drm"].asUInt();
+					}
+					if (diskParams["al0"] != Json::nullValue) {
+						this->DiskParams.allocationLo = (u8)diskParams["al0"].asUInt();
+					}
+					if (diskParams["al1"] != Json::nullValue) {
+						this->DiskParams.allocationHi = (u8)diskParams["al1"].asUInt();
+					}
+					if (diskParams["cks"] != Json::nullValue) {
+						this->DiskParams.checksumLength = (u16)diskParams["cks"].asUInt();
+					}
+					if (diskParams["off"] != Json::nullValue) {
+						this->DiskParams.reservedTracks = (u16)diskParams["off"].asUInt();
+					}
+					if (diskParams["fsn"] != Json::nullValue) {
+						this->DiskParams.firstSectorNumber = (u8)diskParams["fsn"].asUInt();
+					}
+					if (diskParams["sectorsPerTrack"] != Json::nullValue) {
+						this->DiskParams.sectorsPerTrack = (u8)diskParams["sectorsPerTrack"].asUInt();
+					}
+					if (diskParams["gapRW"] != Json::nullValue) {
+						this->DiskParams.gapRW = (u8)diskParams["gapRW"].asUInt();
+					}
+					if (diskParams["gapF"] != Json::nullValue) {
+						this->DiskParams.gapF = (u8)diskParams["gapF"].asUInt();
+					}
+					if (diskParams["fillerByte"] != Json::nullValue) {
+						this->DiskParams.fillerByte = (u8)diskParams["fillerByte"].asUInt();
+					}
+					if (diskParams["sectsizeInRecords"] != Json::nullValue) {
+						this->DiskParams.sectSizeInRecords = (u8)diskParams["sectSizeInRecords"].asUInt();
+					}
+					if (diskParams["sidesInterleaved"] != Json::nullValue) {
+						this->DiskParams.sidesInterleaved = (u8)diskParams["sidesInterleaved"].asUInt();
+					}
+				}
+			}
+
+			const Json::Value files = root["files"];
+			if (files != Json::Value::null) {
+				for (Json::Value::iterator it = files.begin(); it != files.end(); ++it) {
+					Json::Value current = *it;
+					FileToProcess f;
+					if (current["path"] == Json::nullValue) {
+						throw "A file was found without path in configration file.";
+					}
+					//cout << "File: " << current["path"].asString() << endl;
+					f.SetSourcePath(current["path"].asString());
+					f.Header = ParseHeaderType(current.get("header", "none").asString());
+					f.AmsdosType = ParseAmsdosFileType(current.get("amsdosType", "").asString());
+					f.LoadAddress = (u16)current.get("loadAddress", 0).asUInt();
+					f.ExecutionAddress = (u16)current.get("executionAddress", 0).asUInt();
+					f.Hidden = (bool)current.get("system", false).asBool();
+
+					this->FilesToProcess.push_back(f);
+				}
+			}
+		}
+		else {
+			cout << "Config file '" << configFile << "' not found!" << endl;
+		}
+	}
 };
 
 #endif
